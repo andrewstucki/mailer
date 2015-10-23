@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jordan-wright/email"
+	email "gopkg.in/jordan-wright/email.v1"
 )
 
 type SendHandler struct{}
