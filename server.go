@@ -146,10 +146,16 @@ func (s *SendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	var interfaceAddress string
+
 	inboxAddress = os.Getenv("MAILER_INBOX")
 	outboundSender = os.Getenv("MAILER_SENDER")
 	whitelistedDomain = os.Getenv("MAILER_WHITELISTED_DOMAIN")
 	mailerPort := os.Getenv("MAILER_PORT")
+
+	openshiftPort := os.Getenv("OPENSHIFT_GO_PORT")
+	openshiftIP := os.Getenv("OPENSHIFT_GO_IP")
+
 	if inboxAddress == "" || outboundSender == "" || whitelistedDomain == "" {
 		log.Fatal("MAILER_INBOX, MAILER_SENDER, and MAILER_WHITELISTED_DOMAIN must be set")
 		os.Exit(1)
@@ -157,7 +163,14 @@ func main() {
 	if mailerPort == "" {
 		mailerPort = "8080"
 	}
+
+	if openshiftIP != "" && openshiftPort != "" {
+		interfaceAddress = fmt.Sprintf("%s:%s", openshiftIP, openshiftPort)
+	} else {
+		interfaceAddress = fmt.Sprintf(":%s", mailerPort)
+	}
+
 	sendEndpoint := &SendHandler{}
 	http.Handle("/send", corsPanicHandler(sendEndpoint))
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", mailerPort), nil))
+	log.Fatal(http.ListenAndServe(interfaceAddress, nil))
 }
